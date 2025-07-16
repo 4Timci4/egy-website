@@ -1,18 +1,120 @@
 "use client"
 
-import { useRef, useState, useEffect, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, ContactShadows, Float } from '@react-three/drei';
+import { useRef, useState, useEffect, Suspense, Component } from 'react';
+import { Canvas, useLoader, useFrame } from '@react-three/fiber';
+import { OrbitControls, Environment, ContactShadows, Float, Html, useProgress } from '@react-three/drei';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import * as THREE from 'three';
 
-// 3D Karakter Model Bileşeni
-const CharacterModel: React.FC<{ position?: [number, number, number], scale?: number }> = ({ 
-  position = [0, 0, 0], 
-  scale = 1 
+// Hata yakalama bileşeni
+class ErrorBoundary extends Component<{fallback: React.ReactNode, children: React.ReactNode}> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("3D model yüklenirken hata:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Yükleme göstergesi
+const Loader = () => {
+  const { progress } = useProgress();
+  return <Html center><div className="text-white text-xl font-mono">%{Math.round(progress)} yükleniyor</div></Html>;
+};
+
+// FBX Karakter Modeli Bileşeni
+const CharacterModel: React.FC<{ position?: [number, number, number], scale?: number, rotationSpeed?: number }> = ({
+  position = [0, 0, 0],
+  scale = 1,
+  rotationSpeed = 0.3
+}) => {
+  const group = useRef<THREE.Group>(null!);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [modelError, setModelError] = useState<string | null>(null);
+  
+  // FBX modelini yükle - try/catch ile hata yönetimi
+  let fbx;
+  try {
+    fbx = useLoader(FBXLoader, '/character.fbx');
+  } catch (error) {
+    // useLoader hata fırlattığında, ErrorBoundary bunu yakalayacaktır
+    // Bu kod çalışmayacak, sadece tip güvenliği için
+    console.error("FBX model yükleme hatası:", error);
+    throw error;
+  }
+
+  useEffect(() => {
+    if (fbx) {
+      try {
+        // Model yüklendi, materyal ve transformasyonları ayarla
+        fbx.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            // Materyal ayarları - modelin orijinal materyallerini koruyarak ek ayarlar yapabilirsiniz
+            if (child.material) {
+              child.material.needsUpdate = true;
+              child.material.side = THREE.DoubleSide;
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          }
+        });
+        
+        // Modelin yüklendiğini işaretle
+        setModelLoaded(true);
+      } catch (e) {
+        setModelError("Model işlenirken hata oluştu");
+        console.error("Model işleme hatası:", e);
+      }
+    }
+  }, [fbx]);
+  
+  // Modeli döndürme animasyonu
+  useFrame((state) => {
+    if (group.current) {
+      group.current.rotation.y = Math.sin(state.clock.getElapsedTime() * rotationSpeed) * 0.2;
+    }
+  });
+
+  // Hata durumunda bilgilendirici bir mesaj göster
+  if (modelError) {
+    return (
+      <Html center>
+        <div className="bg-red-800/80 text-white p-4 rounded-lg">
+          <p className="text-lg font-bold">Model yüklenemedi</p>
+          <p>{modelError}</p>
+        </div>
+      </Html>
+    );
+  }
+
+  return (
+    <group ref={group} position={position} scale={scale}>
+      <primitive
+        object={fbx}
+        dispose={null}
+        scale={0.01} // FBX modelinin boyutuna göre ayarlayın
+      />
+    </group>
+  );
+};
+
+// Yedek Model (FBX yüklenemezse gösterilecek)
+const FallbackModel: React.FC<{ position?: [number, number, number], scale?: number }> = ({
+  position = [0, 0, 0],
+  scale = 1
 }) => {
   const group = useRef<THREE.Group>(null!);
   
-  // Karakter modelini hafifçe döndürme animasyonu
   useFrame((state) => {
     if (group.current) {
       group.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.2;
@@ -21,37 +123,32 @@ const CharacterModel: React.FC<{ position?: [number, number, number], scale?: nu
 
   return (
     <group ref={group} position={position} scale={scale}>
-      {/* Baş */}
+      {/* Basit bir insan figürü */}
       <mesh position={[0, 1.5, 0]}>
         <sphereGeometry args={[0.25, 32, 32]} />
         <meshStandardMaterial color="#f1c27d" roughness={0.5} metalness={0.2} />
       </mesh>
       
-      {/* Vücut */}
       <mesh position={[0, 0.75, 0]}>
         <capsuleGeometry args={[0.2, 0.7, 16, 32]} />
         <meshStandardMaterial color="#FF6B6B" roughness={0.6} metalness={0.1} />
       </mesh>
       
-      {/* Sol Kol */}
       <mesh position={[-0.3, 0.75, 0]} rotation={[0, 0, -Math.PI / 4]}>
         <capsuleGeometry args={[0.08, 0.5, 16, 32]} />
         <meshStandardMaterial color="#FF6B6B" roughness={0.6} metalness={0.1} />
       </mesh>
       
-      {/* Sağ Kol */}
       <mesh position={[0.3, 0.75, 0]} rotation={[0, 0, Math.PI / 4]}>
         <capsuleGeometry args={[0.08, 0.5, 16, 32]} />
         <meshStandardMaterial color="#FF6B6B" roughness={0.6} metalness={0.1} />
       </mesh>
       
-      {/* Sol Bacak */}
       <mesh position={[-0.15, 0.2, 0]}>
         <capsuleGeometry args={[0.09, 0.4, 16, 32]} />
         <meshStandardMaterial color="#4D4AE8" roughness={0.6} metalness={0.1} />
       </mesh>
       
-      {/* Sağ Bacak */}
       <mesh position={[0.15, 0.2, 0]}>
         <capsuleGeometry args={[0.09, 0.4, 16, 32]} />
         <meshStandardMaterial color="#4D4AE8" roughness={0.6} metalness={0.1} />
@@ -92,23 +189,27 @@ const FloatingObjects: React.FC = () => {
 const Scene: React.FC = () => {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
+      <ambientLight intensity={0.7} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} />
       
-      <Suspense fallback={null}>
-        <CharacterModel position={[0, -0.5, 0]} scale={1.2} />
+      <Suspense fallback={<Loader />}>
+        {/* FBX dosyası yüklendiyse CharacterModel, yüklenemediyse FallbackModel göster */}
+        <ErrorBoundary fallback={<FallbackModel position={[0, -0.5, 0]} scale={1.2} />}>
+          <CharacterModel position={[0, -0.5, 0]} scale={1.2} />
+        </ErrorBoundary>
         <FloatingObjects />
-        <Environment preset="city" />
-        <ContactShadows 
+        <Environment preset="studio" />
+        <ContactShadows
           position={[0, -1.4, 0]}
           opacity={0.6}
           scale={10}
           blur={2}
           far={4}
+          color="#704d9d"
         />
       </Suspense>
-      <OrbitControls 
+      <OrbitControls
         enableZoom={false}
         minPolarAngle={Math.PI / 3}
         maxPolarAngle={Math.PI / 2}
