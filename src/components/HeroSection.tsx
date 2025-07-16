@@ -64,7 +64,7 @@ export const HeroSection = () => {
   }, [animate])
 
   return (
-    <section className="relative h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
+    <section className="relative h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md pt-32">
       <div className="w-full absolute inset-0 h-screen">
         <SparklesCore
           id="tsparticlesfullpage"
