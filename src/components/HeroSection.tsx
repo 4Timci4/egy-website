@@ -33,6 +33,23 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
       // Modelin orijinal konumunu merkeze getir
       fbx.position.set(0, 0, 0);
       
+      // HMR için cache temizleme
+      if (process.env.NODE_ENV === 'development') {
+        fbx.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(mat => {
+                mat.needsUpdate = true;
+                if (mat.map) mat.map.needsUpdate = true;
+              });
+            } else {
+              child.material.needsUpdate = true;
+              if (child.material.map) child.material.map.needsUpdate = true;
+            }
+          }
+        });
+      }
+      
       // Modelin yönünü düzelt (gerekirse)
       // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
       
@@ -65,6 +82,10 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         return 'roughness' in material;
       };
       
+      const hasMetalness = (material: THREE.Material): material is THREE.Material & { metalness: number } => {
+        return 'metalness' in material;
+      };
+      
       // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
       const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
         if (!originalMaterial) return originalMaterial;
@@ -73,56 +94,31 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         let material = originalMaterial;
         
         // ReflectionFactor değerini originalMaterial'dan al (varsa)
-        let reflectionFactor = 0.2; // Daha az yansıma için azaltıldı
+        let reflectionFactor = 0.05; // Çok düşük yansıma
         if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
           reflectionFactor = originalMaterial.userData.reflectionFactor;
         }
         
-        // Eğer reflectionFactor kullanılacaksa, materyali özelleştir
+        // EnvMap'i tamamen kapat
         if (hasEnvMap(material)) {
-          material.envMap = material.envMap || scene?.environment;
+          material.envMap = null;
         }
         
         if (hasReflectivity(material)) {
-          material.reflectivity = reflectionFactor;
+          material.reflectivity = 0;
         }
         
         // Roughness'i arttırarak yüzeyi daha mat yap
         if (hasRoughness(material)) {
-          material.roughness = 0.6; // Daha mat yüzey için artırıldı
+          material.roughness = 0.9; // Maksimum mat yüzey
+        }
+        
+        // Metalness'i minimuma indir
+        if (hasMetalness(material)) {
+          material.metalness = 0; // Tamamen metalik olmayan
         }
         
         material.needsUpdate = true;
-        
-        // ShaderMaterial düzenleme (gelişmiş özelleştirme için)
-        material.onBeforeCompile = (shader: any) => {
-          // Uniforms ekleyelim
-          shader.uniforms.reflectionFactor = { value: reflectionFactor };
-          
-          // Uniform tanımlamasını shader başında ekle
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <common>',
-            `#include <common>
-            uniform float reflectionFactor;`
-          );
-          
-          // Envmap fragment kodunu modifiye et
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <envmap_fragment>',
-            `#include <envmap_fragment>
-            #ifdef USE_ENVMAP
-              gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb * reflectionFactor, reflectionFactor);
-            #endif`
-          );
-          
-          // Material shader referansını sakla
-          material.userData.shader = shader;
-        };
-        
-        // Yeni shader programını her materyal örneği için benzersiz yap
-        material.customProgramCacheKey = () => {
-          return reflectionFactor.toString();
-        };
         
         // Texture ayarları
         if (hasMap(material) && material.map !== null) {
@@ -151,7 +147,7 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         }
       });
     }
-  }, [fbx]);
+  }, [fbx, scene]);
 
   return (
     <group ref={group} position={position} scale={scale}>
@@ -165,14 +161,14 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 const Scene: React.FC = () => {
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.8} castShadow />
-      <pointLight position={[-5, -5, -5]} intensity={0.3} />
-      <hemisphereLight args={['#ffffff', '#404040', 0.5]} />
+      <ambientLight intensity={0.2} />
+      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.5} castShadow />
+      <pointLight position={[-5, -5, -5]} intensity={0.1} />
+      <hemisphereLight args={['#ffffff', '#606060', 0.3]} />
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
-        <Environment preset="city" background={false} />
+        
         <ContactShadows
           position={[0, -1.5, 0]}
           opacity={0.4}
@@ -260,11 +256,13 @@ export const HeroSection: React.FC = () => {
         <div className={`lg:col-span-3 transition-all duration-1000 delay-300 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
           <div className="w-full h-[500px] lg:h-[700px] relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_50px_rgba(142,68,173,0.3)]">
             <Canvas
+              key={process.env.NODE_ENV === 'development' ? Date.now() : 'production'}
               dpr={[1, 1.5]}
               gl={{ antialias: true, alpha: true }}
               camera={{ position: [0, 0, 5], fov: 45 }}
               shadows="soft"
               performance={{ min: 0.5 }}
+              frameloop="demand"
             >
               <Scene />
             </Canvas>
