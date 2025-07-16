@@ -189,14 +189,6 @@ export const HeroSection: React.FC = () => {
   
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#090420] to-[#240643]">
-      {/* Arka plan parçacıkları */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-20 left-1/4 w-1 h-1 bg-purple-300 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 left-1/2 w-2 h-2 bg-pink-300 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/3 w-1.5 h-1.5 bg-cyan-300 rounded-full animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-yellow-300 rounded-full animate-pulse"></div>
-      </div>
-      
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8 container mx-auto px-4 py-16 min-h-screen items-center">
         {/* Sol İçerik Bölümü */}
         <div className={`lg:col-span-2 space-y-8 transition-all duration-1000 transform ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
