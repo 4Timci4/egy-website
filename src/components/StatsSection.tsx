@@ -1,8 +1,8 @@
 export const StatsSection = ({
   stats = [
-    { number: "1M+", label: "Aktif Kullanıcı" },
-    { number: "99.9%", label: "Uptime" },
-    { number: "50ms", label: "Ortalama Yanıt" },
+    { number: "150+", label: "Tamamlanan Proje" },
+    { number: "25+", label: "Mutlu Müşteri" },
+    { number: "5+", label: "Yıl Deneyim" },
     { number: "24/7", label: "Destek" }
   ],
 }) => {
@@ -12,9 +12,9 @@ export const StatsSection = ({
         <div className="bg-gradient-to-r from-black via-gray-900 to-black border border-cyan-500/30 backdrop-blur-xl rounded-3xl p-12 text-white shadow-[0_0_50px_rgba(6,182,212,0.2)]">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              Rakamlarla NeonApp
+              Rakamlarla Başarı
             </h2>
-            <p className="text-xl text-white/70">Futuristik performans metrikleri</p>
+            <p className="text-xl text-white/70">3D tasarım ve modelleme alanındaki deneyimim</p>
           </div>
           <div className="grid md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (

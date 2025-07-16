@@ -17,9 +17,10 @@ interface NeonNavBarProps {
 const NeonNavBar: React.FC<NeonNavBarProps> = ({ 
   items = [
     { name: 'Ana Sayfa', url: '#', icon: Home },
-    { name: 'Özellikler', url: '#features', icon: User },
-    { name: 'Hakkında', url: '#about', icon: Briefcase },
-    { name: 'İletişim', url: '#contact', icon: FileText }
+    { name: 'Portfolyo', url: '#portfolio', icon: Briefcase },
+    { name: 'Hizmetler', url: '#services', icon: User },
+    { name: 'Hakkımda', url: '#about', icon: FileText },
+    { name: 'İletişim', url: '#contact', icon: Search }
   ],
   className 
 }) => {

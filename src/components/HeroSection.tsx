@@ -6,41 +6,41 @@ export const HeroSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <div className="inline-flex items-center px-4 py-2 bg-cyan-500/20 border border-cyan-400/50 rounded-full text-cyan-400 text-sm font-medium shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-                🚀 Futuristik Web Deneyimi
+                🎨 3D Sanat & Tasarım
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
-                Modern Neon
+                3D Model
                 <span className="block bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                  Web Tasarımı
+                  Portfolyosu
                 </span>
               </h1>
               <p className="text-xl text-white/70 leading-relaxed">
-                Next.js 15 ve React 19 ile güçlendirilmiş, neon efektleri ve modern tasarım prensipleri ile oluşturulmuş
-                yüksek performanslı web uygulaması. Geleceğin web deneyimini bugün yaşayın.
+                Profesyonel 3D modelleme, animasyon ve görselleştirme hizmetleri.
+                Yaratıcı tasarımlar ve yenilikçi çözümlerle projelerinizi hayata geçiriyorum.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white px-8 py-4 rounded-full font-semibold hover:from-cyan-600 hover:to-purple-600 transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:scale-105">
-                Hemen Başla
+                Portfolyoyu İncele
               </button>
               <button className="border-2 border-cyan-400/50 text-cyan-400 px-8 py-4 rounded-full font-semibold hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300">
-                Demo İzle
+                İletişime Geç
               </button>
             </div>
 
             <div className="flex items-center space-x-8 pt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-400">99%</div>
-                <div className="text-sm text-white/60">Performans</div>
+                <div className="text-2xl font-bold text-cyan-400">50+</div>
+                <div className="text-sm text-white/60">Proje</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-400">50ms</div>
-                <div className="text-sm text-white/60">Yükleme</div>
+                <div className="text-2xl font-bold text-cyan-400">5+</div>
+                <div className="text-sm text-white/60">Yıl Deneyim</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-400">100+</div>
-                <div className="text-sm text-white/60">Bileşen</div>
+                <div className="text-2xl font-bold text-cyan-400">100%</div>
+                <div className="text-sm text-white/60">Memnuniyet</div>
               </div>
             </div>
           </div>
