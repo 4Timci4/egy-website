@@ -1,0 +1,13 @@
+{
+  "material": {
+    "color": "#ffffff",
+    "roughness": -500,
+    "metalness": 0
+  },
+  "lighting": {
+    "ambientIntensity": -1,
+    "spotLightIntensity": 0,
+    "pointLightIntensity": 40,
+    "hemisphereLightIntensity": 0
+  }
+}

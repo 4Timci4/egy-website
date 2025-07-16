@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useFBX, Environment, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
+import characterConfig from '../config/character.json';
 
 // FBX Model Bileşeni
 type CharacterModelProps = {
@@ -13,154 +14,60 @@ type CharacterModelProps = {
 
 const CharacterModel: React.FC<CharacterModelProps> = ({
   position = [0, 0, 0],
-  scale = 0.015 // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
+  scale = 0.015
 }) => {
   const group = useRef<THREE.Group>(null!);
   const fbx = useFBX('/Lupi1.fbx');
   const { scene } = useThree();
-  
-  // Modeli hafifçe döndürme animasyonu
+
   useFrame((state) => {
     if (group.current) {
-      // Daha yavaş ve daha hafif dönüş
       group.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.15;
     }
   });
 
   useEffect(() => {
-    // FBX modellerinde malzemeleri ve ışığı iyileştirme
     if (fbx) {
-      // Modelin orijinal konumunu merkeze getir
       fbx.position.set(0, 0, 0);
-      
-      // Modelin yönünü düzelt (gerekirse)
-      // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
-      
-      // Tip koruma (type guard) fonksiyonları
-      const isMeshStandardMaterial = (material: THREE.Material): material is THREE.MeshStandardMaterial => {
-        return material.type === 'MeshStandardMaterial';
-      };
-      
-      const isMeshPhongMaterial = (material: THREE.Material): material is THREE.MeshPhongMaterial => {
-        return material.type === 'MeshPhongMaterial';
-      };
-      
-      const isMeshPhysicalMaterial = (material: THREE.Material): material is THREE.MeshPhysicalMaterial => {
-        return material.type === 'MeshPhysicalMaterial';
-      };
-      
-      const hasEnvMap = (material: THREE.Material): material is THREE.Material & { envMap: THREE.Texture | null } => {
-        return 'envMap' in material;
-      };
-      
-      const hasReflectivity = (material: THREE.Material): material is THREE.Material & { reflectivity: number } => {
-        return 'reflectivity' in material;
-      };
-      
+
       const hasMap = (material: THREE.Material): material is THREE.Material & { map: THREE.Texture | null } => {
         return 'map' in material && material.map !== undefined;
       };
-      
-      const hasRoughness = (material: THREE.Material): material is THREE.Material & { roughness: number } => {
-        return 'roughness' in material;
-      };
-      
-      const hasMetalness = (material: THREE.Material): material is THREE.Material & { metalness: number } => {
-        return 'metalness' in material;
-      };
-      
-      // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
-      const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
+
+      const applyConfigurableMaterial = (originalMaterial: THREE.Material): THREE.Material => {
         if (!originalMaterial) return originalMaterial;
-        
-        // Materyalin bir kopyasını oluştur
-        let material = originalMaterial;
-        
-        // ReflectionFactor değerini originalMaterial'dan al (varsa)
-        let reflectionFactor = 0; // Daha düşük reflection factor
-        if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
-          reflectionFactor = originalMaterial.userData.reflectionFactor;
+
+        const { color, roughness, metalness } = characterConfig.material;
+
+        const newMaterial = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(color),
+          roughness: roughness,
+          metalness: metalness,
+        });
+
+        if (hasMap(originalMaterial) && originalMaterial.map !== null) {
+          newMaterial.map = originalMaterial.map;
+          newMaterial.map.anisotropy = 16;
         }
         
-        // Environment map'i kaldırarak yansımaları azalt
-        if (hasEnvMap(material)) {
-          material.envMap = null; // Environment map'i kaldır
-        }
-        
-        if (hasReflectivity(material)) {
-          material.reflectivity = 1; // Çok düşük yansıma
-        }
-        
-        // Roughness'i arttırarak yüzeyi daha mat yap
-        if (hasRoughness(material)) {
-          material.roughness = 0; // Çok yüksek roughness = çok mat yüzey
-        }
-        
-        // Metalness'i düşürerek plastik görünüm ver
-        if (hasMetalness(material)) {
-          material.metalness = 1; // Çok düşük metalness = plastik/mat görünüm
-        }
-        
-        material.needsUpdate = true;
-        
-        // ShaderMaterial düzenleme (gelişmiş özelleştirme için)
-        material.onBeforeCompile = (shader: any) => {
-          // Uniforms ekleyelim
-          shader.uniforms.reflectionFactor = { value: reflectionFactor };
-          
-          // Uniform tanımlamasını shader başında ekle
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <common>',
-            `#include <common>
-            uniform float reflectionFactor;`
-          );
-          
-          // Envmap fragment kodunu modifiye et
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <envmap_fragment>',
-            `#include <envmap_fragment>
-            #ifdef USE_ENVMAP
-              gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb * reflectionFactor, reflectionFactor);
-            #endif`
-          );
-          
-          // Material shader referansını sakla
-          material.userData.shader = shader;
-        };
-        
-        // Yeni shader programını her materyal örneği için benzersiz yap
-        material.customProgramCacheKey = () => {
-          return reflectionFactor.toString();
-        };
-        
-        // Texture ayarları
-        if (hasMap(material) && material.map !== null) {
-          material.map.anisotropy = 16;
-        }
-        
-        return material;
+        return newMaterial;
       };
-      
-      // Modelin tüm materyallerini işleyelim
+
       fbx.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          // Materyal işlemleri
           if (child.material) {
-            // Tek materyal veya materyal dizisi için işlem yap
             if (Array.isArray(child.material)) {
-              child.material = child.material.map(applyCustomMaterialWithReflection);
+              child.material = child.material.map(applyConfigurableMaterial);
             } else {
-              child.material = applyCustomMaterialWithReflection(child.material);
+              child.material = applyConfigurableMaterial(child.material);
             }
           }
-          
-          // Gölgeleri etkinleştirme
           child.castShadow = true;
           child.receiveShadow = true;
         }
       });
     }
-  }, [fbx]);
+  }, [fbx, characterConfig]);
 
   return (
     <group ref={group} position={position} scale={scale}>
@@ -172,12 +79,14 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 
 // Ana 3D sahne
 const Scene: React.FC = () => {
+  const { ambientIntensity, spotLightIntensity, pointLightIntensity, hemisphereLightIntensity } = characterConfig.lighting;
+
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={1.5} castShadow />
-      <pointLight position={[-5, -5, -5]} intensity={0.8} />
-      <hemisphereLight args={['#ffffff', '#101010', 0.7]} />
+      <ambientLight intensity={ambientIntensity} />
+      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={spotLightIntensity} castShadow />
+      <pointLight position={[-5, -5, -5]} intensity={pointLightIntensity} />
+      <hemisphereLight args={['#ffffff', '#101010', hemisphereLightIntensity]} />
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
