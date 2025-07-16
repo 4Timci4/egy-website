@@ -1,66 +1,116 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useEffect } from "react"
+import { motion, stagger, useAnimate } from "motion/react"
 
-// Ana Hero bileşeni
-export const HeroSection: React.FC = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
+import Floating, { FloatingElement } from "@/components/ui/parallax-floating"
+
+const exampleImages = [
+  {
+    url: "https://images.unsplash.com/photo-1727341554370-80e0fe9ad082?q=80&w=2276&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    author: "Branislav Rodman",
+    link: "https://unsplash.com/photos/a-black-and-white-photo-of-a-woman-brushing-her-teeth-r1SjnJL5tf0",
+    title: "A Black and White Photo of a Woman Brushing Her Teeth",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1640680608781-2e4199dd1579?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    link: "https://unsplash.com/photos/a-painting-of-a-palm-leaf-on-a-multicolored-background-AaNPwrSNOFE",
+    title: "Neon Palm",
+    author: "Tim Mossholder",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1726083085160-feeb4e1e5b00?q=80&w=3024&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    link: "https://unsplash.com/photos/a-blurry-photo-of-a-crowd-of-people-UgbxzloNGsc",
+    author: "ANDRII SOLOK",
+    title: "A blurry photo of a crowd of people",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1562016600-ece13e8ba570?q=80&w=2838&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    link: "https://unsplash.com/photos/rippling-crystal-blue-water-9-OCsKoyQlk",
+    author: "Wesley Tingey",
+    title: "Rippling Crystal Blue Water",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1624344965199-ed40391d20f2?q=80&w=2960&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    link: "https://unsplash.com/de/fotos/mann-im-schwarzen-hemd-unter-blauem-himmel-m8RDNiuEXro",
+    author: "Serhii Tyaglovsky",
+    title: "Mann im schwarzen Hemd unter blauem Himmel",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1689553079282-45df1b35741b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    link: "https://unsplash.com/photos/a-woman-with-a-flower-crown-on-her-head-0S3muIttbsY",
+    author: "Vladimir Yelizarov",
+    title: "A women with a flower crown on her head",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1721968317938-cf8c60fccd1a?q=80&w=2728&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "A blurry photo of white flowers in a field",
+    author: "Eugene Golovesov",
+    link: "https://unsplash.com/photos/a-blurry-photo-of-white-flowers-in-a-field-6qbx0lzGPyc",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1677338354108-223e807fb1bd?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    author: "Mathilde Langevin",
+    link: "https://unsplash.com/photos/a-table-topped-with-two-wine-glasses-and-plates-Ig0gRAHspV0",
+    title: "A table topped with two wine glasses and plates",
+  },
+]
+
+export const HeroSection = () => {
+  const [scope, animate] = useAnimate()
 
   useEffect(() => {
-    // Sayfa yüklendiğinde animasyon için
-    setIsLoaded(true);
-  }, []);
-  
+    animate("img", { opacity: [0, 1] }, { duration: 0.5, delay: stagger(0.15) })
+  }, [animate])
+
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#090420] to-[#240643]">
-      <div className="relative z-10 container mx-auto px-4 py-16 min-h-screen flex items-center justify-center">
-        {/* İçerik Bölümü */}
-        <div className={`max-w-4xl mx-auto text-center space-y-8 transition-all duration-1000 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-          <div className="space-y-6">
-            <div className="inline-flex items-center px-4 py-2 bg-purple-900/40 backdrop-blur-sm border border-purple-500/30 rounded-full text-purple-300 text-sm font-medium">
-              🎮 3D KARAKTER TASARIMCISI
-            </div>
-            
-            <h1 className="text-5xl lg:text-7xl font-extrabold">
-              <span className="block text-white">Karakterlere</span>
-              <span className="block bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-500 bg-clip-text text-transparent">Ruh Katıyorum</span>
-            </h1>
-            
-            <p className="text-xl text-purple-100/80 max-w-2xl mx-auto">
-              Oyunlar ve dijital dünyalar için yaratıcı, ifade dolu karakterler tasarlıyorum.
-              Hayal ettiğiniz kahramanları gerçeğe dönüştürüyorum.
-            </p>
-          </div>
+    <section className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-[#090420] to-[#240643] pt-32">
+      <div
+        className="flex w-full h-full justify-center items-center relative overflow-hidden"
+        ref={scope}
+      >
+
+        <Floating sensitivity={-1} className="overflow-hidden">
+          <FloatingElement depth={0.6} className="top-[15%] left-[10%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[0].url}
+              alt={exampleImages[0].title}
+              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
           
-          <div className="flex flex-wrap gap-4 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full text-white font-semibold shadow-lg shadow-purple-700/30 hover:shadow-purple-700/50 hover:scale-105 transition-all duration-300">
-              Portfolyoyu İncele
-            </button>
-            
-            <button className="px-8 py-4 border border-purple-500/30 backdrop-blur-sm rounded-full text-purple-300 font-semibold hover:bg-purple-900/20 transition-all duration-300">
-              İletişime Geç
-            </button>
-          </div>
+          <FloatingElement depth={1.2} className="top-[20%] left-[75%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[1].url}
+              alt={exampleImages[1].title}
+              className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 max-w-2xl mx-auto">
-            <div className="space-y-1 backdrop-blur-sm bg-purple-900/10 rounded-xl p-4 border border-purple-500/10">
-              <div className="text-3xl font-bold text-white">120+</div>
-              <div className="text-purple-300/80 text-sm">Karakter</div>
-            </div>
-            <div className="space-y-1 backdrop-blur-sm bg-purple-900/10 rounded-xl p-4 border border-purple-500/10">
-              <div className="text-3xl font-bold text-white">10+</div>
-              <div className="text-purple-300/80 text-sm">Yıl Deneyim</div>
-            </div>
-            <div className="space-y-1 backdrop-blur-sm bg-purple-900/10 rounded-xl p-4 border border-purple-500/10">
-              <div className="text-3xl font-bold text-white">35+</div>
-              <div className="text-purple-300/80 text-sm">Mutlu Müşteri</div>
-            </div>
-          </div>
-        </div>
+          <FloatingElement depth={0.8} className="top-[70%] left-[5%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[2].url}
+              alt={exampleImages[2].title}
+              className="w-28 h-28 md:w-40 md:h-40 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+          
+          <FloatingElement depth={1.5} className="top-[65%] left-[80%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[3].url}
+              alt={exampleImages[3].title}
+              className="w-24 h-24 md:w-36 md:h-36 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+        </Floating>
       </div>
       
       {/* Alt kısım süslemeleri */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#240643] to-transparent"></div>
     </section>
-  );
-};
+  )
+}
