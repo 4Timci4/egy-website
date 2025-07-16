@@ -30,7 +30,7 @@ export const FeaturesSection = ({
       title: "Ürün Tasarımı",
       description: "E-ticaret ve pazarlama için profesyonel ürün görselleştirme"
     }
-  ],
+  ]
 }) => {
   return (
     <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-black/20 backdrop-blur-sm">

@@ -1,0 +1,5 @@
+id = "use-all-mcps-when-needed"
+title = "Gerekli Olduğunda Tüm MCP'leri Kullan"
+scope = ["all"]
+target_audience = ["roo-commander"]
+status = "active"
