@@ -6,7 +6,12 @@ import { OrbitControls, useFBX, Environment, ContactShadows, Float } from '@reac
 import * as THREE from 'three';
 
 // FBX Model Bileşeni
-const CharacterModel: React.FC<{ position?: [number, number, number], scale?: number }> = ({
+type CharacterModelProps = {
+  position?: [number, number, number];
+  scale?: number;
+};
+
+const CharacterModel: React.FC<CharacterModelProps> = ({
   position = [0, 0, 0],
   scale = 0.005 // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
 }) => {

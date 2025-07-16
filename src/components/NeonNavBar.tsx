@@ -112,11 +112,11 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
                   href={item.url}
                   key={item.name}
                   onClick={() => handleNavClick(item.name, item.url)}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 w-full text-left text-white/80 hover:text-cyan-400 hover:translate-x-1 active:scale-98 ${
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 w-full text-left text-white/80 hover:text-cyan-400 hover:translate-x-1 active:scale-95 ${
                     isActive ? 'text-cyan-400 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]' : ''
                   }`}
                 >
-                  <item.icon size={20} />
+                  {React.createElement(item.icon, { size: 20 })}
                   <span className="font-medium">{item.name}</span>
 
                   {/* Active indicator */}
