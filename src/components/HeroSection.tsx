@@ -2,8 +2,8 @@
 
 import { useEffect } from "react"
 import { motion, stagger, useAnimate } from "motion/react"
-
 import Floating, { FloatingElement } from "@/components/ui/parallax-floating"
+import { SparklesCore } from "@/components/ui/sparkles"
 
 const exampleImages = [
   {
@@ -64,12 +64,22 @@ export const HeroSection = () => {
   }, [animate])
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-[#090420] to-[#240643] pt-32">
+    <section className="relative h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
+      <div className="w-full absolute inset-0 h-screen">
+        <SparklesCore
+          id="tsparticlesfullpage"
+          background="transparent"
+          minSize={0.6}
+          maxSize={1.4}
+          particleDensity={100}
+          className="w-full h-full"
+          particleColor="#FFFFFF"
+        />
+      </div>
       <div
-        className="flex w-full h-full justify-center items-center relative overflow-hidden"
+        className="flex w-full h-full justify-center items-center relative"
         ref={scope}
       >
-
         <Floating sensitivity={-1} className="overflow-hidden">
           <FloatingElement depth={0.5} className="top-[8%] left-[11%]">
             <motion.img
@@ -144,9 +154,6 @@ export const HeroSection = () => {
           </FloatingElement>
         </Floating>
       </div>
-      
-      {/* Alt kısım süslemeleri */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#240643] to-transparent"></div>
     </section>
   )
 }
