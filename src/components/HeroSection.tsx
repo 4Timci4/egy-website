@@ -9,11 +9,13 @@ import * as THREE from 'three';
 type CharacterModelProps = {
   position?: [number, number, number];
   scale?: number;
+  onLoad?: () => void;
 };
 
 const CharacterModel: React.FC<CharacterModelProps> = ({
   position = [0, 0, 0],
-  scale = 0.005 // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
+  scale = 0.01, // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
+  onLoad
 }) => {
   const group = useRef<THREE.Group>(null!);
   const fbx = useFBX('/Lupi1.fbx');
@@ -134,8 +136,13 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
           child.receiveShadow = true;
         }
       });
+      
+      // Model yüklendikten sonra callback çağır
+      if (onLoad) {
+        onLoad();
+      }
     }
-  }, [fbx, scene]);
+  }, [fbx, scene, onLoad]);
 
   return (
     <group ref={group} position={position} scale={scale}>
@@ -146,7 +153,11 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 
 
 // Ana 3D sahne
-const Scene: React.FC = () => {
+type SceneProps = {
+  onModelLoad?: () => void;
+};
+
+const Scene: React.FC<SceneProps> = ({ onModelLoad }) => {
   return (
     <>
       <ambientLight intensity={0.3} />
@@ -157,7 +168,7 @@ const Scene: React.FC = () => {
       <hemisphereLight args={['#ffffff', '#8080ff', 0.3]} />
       
       <Suspense fallback={null}>
-        <CharacterModel position={[0, -1, 0]} scale={0.015} />
+        <CharacterModel position={[0, -1, 0]} scale={0.015} onLoad={onModelLoad} />
         
         <ContactShadows
           position={[0, -1.5, 0]}
@@ -181,11 +192,16 @@ const Scene: React.FC = () => {
 // Ana Hero bileşeni
 export const HeroSection: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
 
   useEffect(() => {
     // Sayfa yüklendiğinde animasyon için
     setIsLoaded(true);
   }, []);
+
+  const handleModelLoad = () => {
+    setIsModelLoaded(true);
+  };
   
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#090420] to-[#240643]">
@@ -246,25 +262,23 @@ export const HeroSection: React.FC = () => {
               performance={{ min: 0.5 }}
               frameloop="demand"
             >
-              <Scene />
+              <Scene onModelLoad={handleModelLoad} />
             </Canvas>
             
             {/* Yükleme göstergesi */}
-            {!isLoaded && (
+            {!isModelLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#090420]/80">
                 <div className="flex flex-col items-center space-y-4">
                   <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-purple-300 font-medium">3D Model Yükleniyor...</p>
+                  <p className="text-purple-300 font-medium">Karakter yükleniyor...</p>
                 </div>
               </div>
             )}
             
             {/* Canvas üzerine bindirilen bilgiler */}
             <div className="absolute bottom-6 left-6 right-6 rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 p-4 text-white text-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
-                </div>
+              <div className="flex items-center justify-center gap-3">
+                <div className="bg-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
                 <div className="font-mono opacity-70 text-xs">
                   Modeli döndürmek için tıklayıp sürükleyin
                 </div>
