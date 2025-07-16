@@ -90,42 +90,30 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
       const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
         if (!originalMaterial) return originalMaterial;
         
-        // Materyalin bir kopyasını oluştur
-        let material = originalMaterial;
+        // Yeni MeshStandardMaterial oluştur
+        const newMaterial = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          roughness: 1.0,
+          metalness: 0.0,
+          emissive: new THREE.Color(0x000000),
+          emissiveIntensity: 0.0,
+          envMap: null,
+        });
         
-        // ReflectionFactor değerini originalMaterial'dan al (varsa)
-        let reflectionFactor = 0.05; // Çok düşük yansıma
-        if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
-          reflectionFactor = originalMaterial.userData.reflectionFactor;
+        // Orijinal materyalden texture bilgilerini kopyala
+        if (hasMap(originalMaterial) && originalMaterial.map !== null) {
+          newMaterial.map = originalMaterial.map;
+          newMaterial.map.anisotropy = 16;
         }
         
-        // EnvMap'i tamamen kapat
-        if (hasEnvMap(material)) {
-          material.envMap = null;
+        // Orijinal materyalden renk bilgisini kopyala
+        if ('color' in originalMaterial) {
+          newMaterial.color = (originalMaterial as any).color;
         }
         
-        if (hasReflectivity(material)) {
-          material.reflectivity = 0;
-        }
+        newMaterial.needsUpdate = true;
         
-        // Roughness'i arttırarak yüzeyi daha mat yap
-        if (hasRoughness(material)) {
-          material.roughness = 0.9; // Maksimum mat yüzey
-        }
-        
-        // Metalness'i minimuma indir
-        if (hasMetalness(material)) {
-          material.metalness = 0; // Tamamen metalik olmayan
-        }
-        
-        material.needsUpdate = true;
-        
-        // Texture ayarları
-        if (hasMap(material) && material.map !== null) {
-          material.map.anisotropy = 16;
-        }
-        
-        return material;
+        return newMaterial;
       };
       
       // Modelin tüm materyallerini işleyelim
@@ -161,17 +149,19 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 const Scene: React.FC = () => {
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.5} castShadow />
+      <ambientLight intensity={0.15} />
+      <directionalLight position={[5, 10, 5]} intensity={0.5} castShadow />
+      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.4} castShadow />
       <pointLight position={[-5, -5, -5]} intensity={0.1} />
-      <hemisphereLight args={['#ffffff', '#606060', 0.3]} />
+      <pointLight position={[5, -5, 5]} intensity={0.1} color="#ffffff" />
+      <hemisphereLight args={['#ffffff', '#8080ff', 0.15]} />
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
         
         <ContactShadows
           position={[0, -1.5, 0]}
-          opacity={0.4}
+          opacity={0.3}
           scale={12}
           blur={2.5}
           far={5}
