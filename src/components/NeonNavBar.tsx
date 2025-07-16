@@ -31,7 +31,7 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
     setIsMenuOpen(false);
     
     // Smooth scroll to section
-    if (url.startsWith('#')) {
+    if (url.startsWith('#') && url.length > 1) {
       const element = document.querySelector(url);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
