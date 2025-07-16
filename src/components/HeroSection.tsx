@@ -149,12 +149,12 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 const Scene: React.FC = () => {
   return (
     <>
-      <ambientLight intensity={0.15} />
-      <directionalLight position={[5, 10, 5]} intensity={0.5} castShadow />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.4} castShadow />
-      <pointLight position={[-5, -5, -5]} intensity={0.1} />
-      <pointLight position={[5, -5, 5]} intensity={0.1} color="#ffffff" />
-      <hemisphereLight args={['#ffffff', '#8080ff', 0.15]} />
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
+      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.6} castShadow />
+      <pointLight position={[-5, -5, -5]} intensity={0.2} />
+      <pointLight position={[5, -5, 5]} intensity={0.2} color="#ffffff" />
+      <hemisphereLight args={['#ffffff', '#8080ff', 0.3]} />
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
