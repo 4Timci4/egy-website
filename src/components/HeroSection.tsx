@@ -71,39 +71,75 @@ export const HeroSection = () => {
       >
 
         <Floating sensitivity={-1} className="overflow-hidden">
-          <FloatingElement depth={0.6} className="top-[15%] left-[10%]">
+          <FloatingElement depth={0.5} className="top-[8%] left-[11%]">
             <motion.img
               initial={{ opacity: 0 }}
               src={exampleImages[0].url}
               alt={exampleImages[0].title}
-              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+              className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
             />
           </FloatingElement>
           
-          <FloatingElement depth={1.2} className="top-[20%] left-[75%]">
+          <FloatingElement depth={1} className="top-[10%] left-[32%]">
             <motion.img
               initial={{ opacity: 0 }}
               src={exampleImages[1].url}
               alt={exampleImages[1].title}
-              className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+              className="w-20 h-20 md:w-28 md:h-28 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
             />
           </FloatingElement>
           
-          <FloatingElement depth={0.8} className="top-[70%] left-[5%]">
+          <FloatingElement depth={2} className="top-[2%] left-[53%]">
             <motion.img
               initial={{ opacity: 0 }}
               src={exampleImages[2].url}
               alt={exampleImages[2].title}
-              className="w-28 h-28 md:w-40 md:h-40 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+              className="w-28 h-40 md:w-40 md:h-52 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
             />
           </FloatingElement>
           
-          <FloatingElement depth={1.5} className="top-[65%] left-[80%]">
+          <FloatingElement depth={1} className="top-[0%] left-[83%]">
             <motion.img
               initial={{ opacity: 0 }}
               src={exampleImages[3].url}
               alt={exampleImages[3].title}
-              className="w-24 h-24 md:w-36 md:h-36 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+          
+          <FloatingElement depth={1} className="top-[40%] left-[2%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[4].url}
+              alt={exampleImages[4].title}
+              className="w-28 h-28 md:w-36 md:h-36 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+          
+          <FloatingElement depth={2} className="top-[70%] left-[77%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[7].url}
+              alt={exampleImages[7].title}
+              className="w-28 h-28 md:w-36 md:h-48 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+          
+          <FloatingElement depth={4} className="top-[73%] left-[15%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[5].url}
+              alt={exampleImages[5].title}
+              className="w-40 md:w-52 h-full object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
+            />
+          </FloatingElement>
+          
+          <FloatingElement depth={1} className="top-[80%] left-[50%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              src={exampleImages[6].url}
+              alt={exampleImages[6].title}
+              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg hover:scale-105 duration-200 cursor-pointer transition-transform shadow-lg"
             />
           </FloatingElement>
         </Floating>
