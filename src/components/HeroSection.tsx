@@ -1,8 +1,8 @@
 "use client"
 
 import { useRef, useState, useEffect, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useFBX, Environment, ContactShadows, Float } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, useFBX, Environment, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 
 // FBX Model Bileşeni
@@ -17,6 +17,7 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 }) => {
   const group = useRef<THREE.Group>(null!);
   const fbx = useFBX('/Lupi1.fbx');
+  const { scene } = useThree();
   
   // Modeli hafifçe döndürme animasyonu
   useFrame((state) => {
@@ -35,27 +36,103 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
       // Modelin yönünü düzelt (gerekirse)
       // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
       
+      // Tip koruma (type guard) fonksiyonları
+      const isMeshStandardMaterial = (material: THREE.Material): material is THREE.MeshStandardMaterial => {
+        return material.type === 'MeshStandardMaterial';
+      };
+      
+      const isMeshPhongMaterial = (material: THREE.Material): material is THREE.MeshPhongMaterial => {
+        return material.type === 'MeshPhongMaterial';
+      };
+      
+      const isMeshPhysicalMaterial = (material: THREE.Material): material is THREE.MeshPhysicalMaterial => {
+        return material.type === 'MeshPhysicalMaterial';
+      };
+      
+      const hasEnvMap = (material: THREE.Material): material is THREE.Material & { envMap: THREE.Texture | null } => {
+        return 'envMap' in material;
+      };
+      
+      const hasReflectivity = (material: THREE.Material): material is THREE.Material & { reflectivity: number } => {
+        return 'reflectivity' in material;
+      };
+      
+      const hasMap = (material: THREE.Material): material is THREE.Material & { map: THREE.Texture | null } => {
+        return 'map' in material && material.map !== undefined;
+      };
+      
+      // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
+      const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
+        if (!originalMaterial) return originalMaterial;
+        
+        // Materyalin bir kopyasını oluştur
+        let material = originalMaterial;
+        
+        // ReflectionFactor değerini originalMaterial'dan al (varsa)
+        let reflectionFactor = 0.5; // Varsayılan değer
+        if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
+          reflectionFactor = originalMaterial.userData.reflectionFactor;
+        }
+        
+        // Eğer reflectionFactor kullanılacaksa, materyali özelleştir
+        if (hasEnvMap(material)) {
+          material.envMap = material.envMap || scene?.environment;
+        }
+        
+        if (hasReflectivity(material)) {
+          material.reflectivity = reflectionFactor;
+        }
+        
+        material.needsUpdate = true;
+        
+        // ShaderMaterial düzenleme (gelişmiş özelleştirme için)
+        material.onBeforeCompile = (shader: any) => {
+          // Uniforms ekleyelim
+          shader.uniforms.reflectionFactor = { value: reflectionFactor };
+          
+          // Uniform tanımlamasını shader başında ekle
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <common>',
+            `#include <common>
+            uniform float reflectionFactor;`
+          );
+          
+          // Envmap fragment kodunu modifiye et
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <envmap_fragment>',
+            `#include <envmap_fragment>
+            #ifdef USE_ENVMAP
+              gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb * reflectionFactor, reflectionFactor);
+            #endif`
+          );
+          
+          // Material shader referansını sakla
+          material.userData.shader = shader;
+        };
+        
+        // Yeni shader programını her materyal örneği için benzersiz yap
+        material.customProgramCacheKey = () => {
+          return reflectionFactor.toString();
+        };
+        
+        // Texture ayarları
+        if (hasMap(material) && material.map !== null) {
+          material.map.anisotropy = 16;
+        }
+        
+        return material;
+      };
+      
+      // Modelin tüm materyallerini işleyelim
       fbx.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          // Daha iyi görünüm için materyal ayarları
+          // Materyal işlemleri
           if (child.material) {
-            child.material.needsUpdate = true;
-            child.material.side = THREE.DoubleSide;
-            
-            // Ek materyal özellikleri
-            if (child.material.map) {
-              child.material.map.anisotropy = 16;
-            }
-            
-            // Eğer birden fazla materyal varsa
+            // Tek materyal veya materyal dizisi için işlem yap
             if (Array.isArray(child.material)) {
-              child.material.forEach(mat => {
-                mat.needsUpdate = true;
-                mat.side = THREE.DoubleSide;
-                if (mat.map) {
-                  mat.map.anisotropy = 16;
-                }
-              });
+              child.material = child.material.map(applyCustomMaterialWithReflection);
+            } else {
+              child.material = applyCustomMaterialWithReflection(child.material);
             }
           }
           
@@ -74,33 +151,6 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
   );
 };
 
-// Karakterin etrafında süzülen 3D nesneler
-const FloatingObjects: React.FC = () => {
-  return (
-    <>
-      <Float speed={1.5} rotationIntensity={1.5} floatIntensity={1.5} position={[-1, 1, 0.5]}>
-        <mesh>
-          <torusGeometry args={[0.15, 0.05, 16, 32]} />
-          <meshStandardMaterial color="#00FFFF" roughness={0.3} metalness={0.8} />
-        </mesh>
-      </Float>
-      
-      <Float speed={1.8} rotationIntensity={1.2} floatIntensity={1.2} position={[1.2, 0.5, 0.8]}>
-        <mesh>
-          <dodecahedronGeometry args={[0.15, 0]} />
-          <meshStandardMaterial color="#FF3E9D" roughness={0.3} metalness={0.8} />
-        </mesh>
-      </Float>
-      
-      <Float speed={2.0} rotationIntensity={1.0} floatIntensity={1.0} position={[0.5, 1.4, -0.5]}>
-        <mesh>
-          <icosahedronGeometry args={[0.17, 0]} />
-          <meshStandardMaterial color="#FFDE59" roughness={0.3} metalness={0.8} />
-        </mesh>
-      </Float>
-    </>
-  );
-};
 
 // Ana 3D sahne
 const Scene: React.FC = () => {
@@ -113,7 +163,6 @@ const Scene: React.FC = () => {
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
-        <FloatingObjects />
         <Environment preset="studio" />
         <ContactShadows
           position={[0, -1.5, 0]}
