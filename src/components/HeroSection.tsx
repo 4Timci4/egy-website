@@ -7,7 +7,7 @@ import { SparklesCore } from "@/components/ui/sparkles"
 
 const exampleImages = [
   {
-    url: "https://images.unsplash.com/photo-1727341554370-80e0fe9ad082?q=80&w=2276&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    url: "https://i.ibb.co/WNYgSMw6/Moly7.png",
     author: "Branislav Rodman",
     link: "https://unsplash.com/photos/a-black-and-white-photo-of-a-woman-brushing-her-teeth-r1SjnJL5tf0",
     title: "A Black and White Photo of a Woman Brushing Her Teeth",
@@ -25,7 +25,7 @@ const exampleImages = [
     title: "A blurry photo of a crowd of people",
   },
   {
-    url: "https://images.unsplash.com/photo-1562016600-ece13e8ba570?q=80&w=2838&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    url: "https://drive.google.com/file/d/1AFClJQgfswNfxDP0yTpsj0wUTm9ft_BJ/view?usp=drive_link",
     link: "https://unsplash.com/photos/rippling-crystal-blue-water-9-OCsKoyQlk",
     author: "Wesley Tingey",
     title: "Rippling Crystal Blue Water",
@@ -71,15 +71,53 @@ export const HeroSection = () => {
           background="transparent"
           minSize={0.6}
           maxSize={1.4}
-          particleDensity={100}
+          particleDensity={150}
           className="w-full h-full"
           particleColor="#FFFFFF"
+        />
+      </div>
+      <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 w-full h-96">
+        <SparklesCore
+          id="tsparticlesbottom"
+          background="transparent"
+          minSize={0.8}
+          maxSize={2.0}
+          particleDensity={200}
+          className="w-full h-full"
+          particleColor="#06b6d4"
         />
       </div>
       <div
         className="flex w-full h-full justify-center items-center relative"
         ref={scope}
       >
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-8"
+            >
+              Acme
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-64 mx-auto mb-4"
+            />
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto"
+            >
+              Creative Digital Studio
+            </motion.p>
+          </div>
+        </div>
+        
         <Floating sensitivity={-1} className="overflow-hidden">
           <FloatingElement depth={0.5} className="top-[8%] left-[11%]">
             <motion.img
