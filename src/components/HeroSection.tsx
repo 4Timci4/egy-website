@@ -73,7 +73,7 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         let material = originalMaterial;
         
         // ReflectionFactor değerini originalMaterial'dan al (varsa)
-        let reflectionFactor = 0.5; // Varsayılan değer
+        let reflectionFactor = 0.2; // Daha az yansıma için azaltıldı
         if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
           reflectionFactor = originalMaterial.userData.reflectionFactor;
         }
@@ -89,7 +89,7 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         
         // Roughness'i arttırarak yüzeyi daha mat yap
         if (hasRoughness(material)) {
-          material.roughness = 0; // Yüksek roughness = daha mat yüzey
+          material.roughness = 0.6; // Daha mat yüzey için artırıldı
         }
         
         material.needsUpdate = true;
@@ -165,17 +165,17 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 const Scene: React.FC = () => {
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={1.5} castShadow />
-      <pointLight position={[-5, -5, -5]} intensity={0.8} />
-      <hemisphereLight args={['#ffffff', '#101010', 0.7]} />
+      <ambientLight intensity={0.4} />
+      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.8} castShadow />
+      <pointLight position={[-5, -5, -5]} intensity={0.3} />
+      <hemisphereLight args={['#ffffff', '#404040', 0.5]} />
       
       <Suspense fallback={null}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} />
-        <Environment preset="studio" />
+        <Environment preset="city" background={false} />
         <ContactShadows
           position={[0, -1.5, 0]}
-          opacity={0.7}
+          opacity={0.4}
           scale={12}
           blur={2.5}
           far={5}
