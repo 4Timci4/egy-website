@@ -264,7 +264,6 @@ export const HeroSection: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
-                  <span className="font-mono">Lupi1.fbx - Custom Character</span>
                 </div>
                 <div className="font-mono opacity-70 text-xs">
                   Modeli döndürmek için tıklayıp sürükleyin
