@@ -235,8 +235,8 @@ export const HeroSection: React.FC = () => {
         </div>
         
         {/* Sağ 3D Model Bölümü */}
-        <div className={`lg:col-span-3 transition-all duration-1000 delay-300 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-          <div className="w-full h-[500px] lg:h-[700px] relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_50px_rgba(142,68,173,0.3)]">
+        <div className={`lg:col-span-2 transition-all duration-1000 delay-300 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+          <div className="w-full h-[400px] lg:h-[500px] relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_50px_rgba(142,68,173,0.3)]">
             <Canvas
               key={process.env.NODE_ENV === 'development' ? Date.now() : 'production'}
               dpr={[1, 1.5]}
