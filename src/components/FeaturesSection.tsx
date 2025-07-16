@@ -14,21 +14,6 @@ export const FeaturesSection = ({
       icon: "🏗️",
       title: "Mimari Görselleştirme",
       description: "Mimari projeleriniz için fotorealistik render ve görselleştirme"
-    },
-    {
-      icon: "🎮",
-      title: "Oyun Varlıkları",
-      description: "Oyun endüstrisi için optimize edilmiş 3D karakter ve çevre tasarımı"
-    },
-    {
-      icon: "📱",
-      title: "AR/VR İçerik",
-      description: "Artırılmış ve sanal gerçeklik uygulamaları için 3D içerik üretimi"
-    },
-    {
-      icon: "🛍️",
-      title: "Ürün Tasarımı",
-      description: "E-ticaret ve pazarlama için profesyonel ürün görselleştirme"
     }
   ]
 }) => {
