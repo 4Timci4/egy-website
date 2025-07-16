@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Home, User, Briefcase, FileText, Search, Menu, X } from 'lucide-react';
 
 interface NavItem {
@@ -23,23 +23,12 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
   ],
   className 
 }) => {
-  const [activeTab, setActiveTab] = useState(items[0].name);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const [activeTab, setActiveTab] = useState('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNavClick = (itemName: string, url: string) => {
-    setActiveTab(itemName);
-    setIsMobileMenuOpen(false);
+    setActiveTab(itemName.toLowerCase());
+    setIsMenuOpen(false);
     
     // Smooth scroll to section
     if (url.startsWith('#')) {
@@ -61,8 +50,7 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
         <div className="absolute inset-0 rounded-2xl border border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.3)] -z-10" />
         
         {items.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.name;
+          const isActive = activeTab === item.name.toLowerCase();
 
           return (
             <button
@@ -96,17 +84,17 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
       <div className="md:hidden">
         {/* Mobile menu button */}
         <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="relative p-3 bg-black/20 border border-cyan-500/30 backdrop-blur-xl rounded-xl text-white shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:scale-105 active:scale-95 transition-transform duration-200"
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           <div className="absolute inset-0 rounded-xl border border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.3)] -z-10" />
         </button>
 
         {/* Mobile menu */}
         <div
           className={`absolute top-16 left-0 right-0 bg-black/20 border border-cyan-500/30 backdrop-blur-xl rounded-2xl shadow-2xl transition-all duration-200 ${
-            isMobileMenuOpen 
+            isMenuOpen 
               ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
               : 'opacity-0 -translate-y-5 scale-95 pointer-events-none'
           }`}
@@ -115,8 +103,7 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
           
           <div className="p-4 space-y-2">
             {items.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.name;
+              const isActive = activeTab === item.name.toLowerCase();
 
               return (
                 <button
@@ -126,7 +113,7 @@ const NeonNavBar: React.FC<NeonNavBarProps> = ({
                     isActive ? 'text-cyan-400 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]' : ''
                   }`}
                 >
-                  <Icon size={20} />
+                  <item.icon size={20} />
                   <span className="font-medium">{item.name}</span>
                   
                   {/* Active indicator */}

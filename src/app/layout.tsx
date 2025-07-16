@@ -13,34 +13,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NextApp - Modern Web Deneyimi",
-  description: "Next.js 15 ve React 19 ile güçlendirilmiş, modern tasarım prensipleri ile oluşturulmuş yüksek performanslı web uygulaması. Kullanıcı deneyimini ön planda tutan yaklaşımımızla dijital dönüşümünüzü destekliyoruz.",
-  keywords: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Modern Web", "Performance", "UI/UX"],
-  authors: [{ name: "NextApp Team" }],
-  creator: "NextApp",
-  publisher: "NextApp",
+  title: "NeonApp - Futuristik Web Deneyimi",
+  description: "Next.js 15 ve React 19 ile güçlendirilmiş, neon efektleri ve modern tasarım prensipleri ile oluşturulmuş yüksek performanslı web uygulaması. Geleceğin web deneyimini bugün yaşayın.",
+  keywords: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Neon Design", "Futuristic Web", "Performance", "UI/UX"],
+  authors: [{ name: "NeonApp Team" }],
+  creator: "NeonApp",
+  publisher: "NeonApp",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://nextapp.com'),
+  metadataBase: new URL('https://neonapp.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "NextApp - Modern Web Deneyimi",
-    description: "Next.js 15 ve React 19 ile güçlendirilmiş yüksek performanslı web uygulaması",
-    url: 'https://nextapp.com',
-    siteName: 'NextApp',
+    title: "NeonApp - Futuristik Web Deneyimi",
+    description: "Next.js 15 ve React 19 ile güçlendirilmiş, neon efektleri ile yüksek performanslı web uygulaması",
+    url: 'https://neonapp.com',
+    siteName: 'NeonApp',
     locale: 'tr_TR',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "NextApp - Modern Web Deneyimi",
-    description: "Next.js 15 ve React 19 ile güçlendirilmiş yüksek performanslı web uygulaması",
-    creator: '@nextapp',
+    title: "NeonApp - Futuristik Web Deneyimi",
+    description: "Next.js 15 ve React 19 ile güçlendirilmiş, neon efektleri ile yüksek performanslı web uygulaması",
+    creator: '@neonapp',
   },
   robots: {
     index: true,

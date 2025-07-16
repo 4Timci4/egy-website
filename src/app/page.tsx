@@ -73,7 +73,7 @@ export default function Home() {
                       <div className="text-sm font-mono">
                         <div className="text-cyan-400">import</div>
                         <div className="text-purple-400">NeonApp</div>
-                        <div className="text-green-400">from 'futuristic-web'</div>
+                        <div className="text-green-400">from &apos;futuristic-web&apos;</div>
                       </div>
                     </div>
                     <div className="space-y-2">
