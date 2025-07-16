@@ -29,13 +29,9 @@ const CharacterModel: React.FC<{ position?: [number, number, number], scale?: nu
       
       // Modelin yönünü düzelt (gerekirse)
       // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
-
-      console.log("FBX model yüklendi:", fbx);
       
       fbx.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          console.log("Mesh bulundu:", child.name);
-          
           // Daha iyi görünüm için materyal ayarları
           if (child.material) {
             child.material.needsUpdate = true;
@@ -200,18 +196,36 @@ export const HeroSection: React.FC = () => {
         {/* Sağ 3D Model Bölümü */}
         <div className={`lg:col-span-3 transition-all duration-1000 delay-300 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
           <div className="w-full h-[500px] lg:h-[700px] relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_50px_rgba(142,68,173,0.3)]">
-            <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 5], fov: 45 }}>
+            <Canvas
+              dpr={[1, 1.5]}
+              gl={{ antialias: true, alpha: true }}
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              shadows="soft"
+              performance={{ min: 0.5 }}
+            >
               <Scene />
             </Canvas>
+            
+            {/* Yükleme göstergesi */}
+            {!isLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#090420]/80">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-purple-300 font-medium">3D Model Yükleniyor...</p>
+                </div>
+              </div>
+            )}
             
             {/* Canvas üzerine bindirilen bilgiler */}
             <div className="absolute bottom-6 left-6 right-6 rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 p-4 text-white text-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
-                  <span className="font-mono">Character Prototype v2.5</span>
+                  <span className="font-mono">Lupi1.fbx - Custom Character</span>
                 </div>
-                <div className="font-mono opacity-70 text-xs">3D Model Önizleme</div>
+                <div className="font-mono opacity-70 text-xs">
+                  Modeli döndürmek için tıklayıp sürükleyin
+                </div>
               </div>
             </div>
           </div>
