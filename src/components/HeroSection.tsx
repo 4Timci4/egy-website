@@ -13,7 +13,7 @@ type CharacterModelProps = {
 
 const CharacterModel: React.FC<CharacterModelProps> = ({
   position = [0, 0, 0],
-  scale = 0.005 // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
+  scale = 0.015 // FBX modeller genellikle çok büyük olduğundan ölçeği daha da küçültüyoruz
 }) => {
   const group = useRef<THREE.Group>(null!);
   const fbx = useFBX('/Lupi1.fbx');
@@ -61,6 +61,14 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         return 'map' in material && material.map !== undefined;
       };
       
+      const hasRoughness = (material: THREE.Material): material is THREE.Material & { roughness: number } => {
+        return 'roughness' in material;
+      };
+      
+      const hasMetalness = (material: THREE.Material): material is THREE.Material & { metalness: number } => {
+        return 'metalness' in material;
+      };
+      
       // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
       const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
         if (!originalMaterial) return originalMaterial;
@@ -69,18 +77,28 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         let material = originalMaterial;
         
         // ReflectionFactor değerini originalMaterial'dan al (varsa)
-        let reflectionFactor = 0.5; // Varsayılan değer
+        let reflectionFactor = 0; // Daha düşük reflection factor
         if (originalMaterial.userData && originalMaterial.userData.reflectionFactor !== undefined) {
           reflectionFactor = originalMaterial.userData.reflectionFactor;
         }
         
-        // Eğer reflectionFactor kullanılacaksa, materyali özelleştir
+        // Environment map'i kaldırarak yansımaları azalt
         if (hasEnvMap(material)) {
-          material.envMap = material.envMap || scene?.environment;
+          material.envMap = null; // Environment map'i kaldır
         }
         
         if (hasReflectivity(material)) {
-          material.reflectivity = reflectionFactor;
+          material.reflectivity = 1; // Çok düşük yansıma
+        }
+        
+        // Roughness'i arttırarak yüzeyi daha mat yap
+        if (hasRoughness(material)) {
+          material.roughness = 0; // Çok yüksek roughness = çok mat yüzey
+        }
+        
+        // Metalness'i düşürerek plastik görünüm ver
+        if (hasMetalness(material)) {
+          material.metalness = 1; // Çok düşük metalness = plastik/mat görünüm
         }
         
         material.needsUpdate = true;
