@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useFBX, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, useFBX, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 
 // FBX Model Bileşeni
@@ -55,37 +55,9 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
       // Modelin yönünü düzelt (gerekirse)
       // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
       
-      // Tip koruma (type guard) fonksiyonları
-      const isMeshStandardMaterial = (material: THREE.Material): material is THREE.MeshStandardMaterial => {
-        return material.type === 'MeshStandardMaterial';
-      };
-      
-      const isMeshPhongMaterial = (material: THREE.Material): material is THREE.MeshPhongMaterial => {
-        return material.type === 'MeshPhongMaterial';
-      };
-      
-      const isMeshPhysicalMaterial = (material: THREE.Material): material is THREE.MeshPhysicalMaterial => {
-        return material.type === 'MeshPhysicalMaterial';
-      };
-      
-      const hasEnvMap = (material: THREE.Material): material is THREE.Material & { envMap: THREE.Texture | null } => {
-        return 'envMap' in material;
-      };
-      
-      const hasReflectivity = (material: THREE.Material): material is THREE.Material & { reflectivity: number } => {
-        return 'reflectivity' in material;
-      };
-      
+      // Tip koruma (type guard) fonksiyonu
       const hasMap = (material: THREE.Material): material is THREE.Material & { map: THREE.Texture | null } => {
         return 'map' in material && material.map !== undefined;
-      };
-      
-      const hasRoughness = (material: THREE.Material): material is THREE.Material & { roughness: number } => {
-        return 'roughness' in material;
-      };
-      
-      const hasMetalness = (material: THREE.Material): material is THREE.Material & { metalness: number } => {
-        return 'metalness' in material;
       };
       
       // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
@@ -110,7 +82,8 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
         
         // Orijinal materyalden renk bilgisini kopyala
         if ('color' in originalMaterial) {
-          newMaterial.color = (originalMaterial as any).color;
+          const materialWithColor = originalMaterial as THREE.Material & { color: THREE.Color };
+          newMaterial.color = materialWithColor.color;
         }
         
         newMaterial.needsUpdate = true;
@@ -190,12 +163,7 @@ const Scene: React.FC<SceneProps> = ({ onModelLoad }) => {
 
 // Ana CharacterViewer bileşeni
 export const CharacterViewer: React.FC = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
 
   const handleModelLoad = () => {
     setIsModelLoaded(true);
