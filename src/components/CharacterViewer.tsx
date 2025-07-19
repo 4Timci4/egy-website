@@ -1,11 +1,12 @@
-"use client"
+"use client";
 
 import { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useFBX, ContactShadows } from '@react-three/drei';
+import { OrbitControls, useFBX, ContactShadows, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
+import { SimpleLoadingScreen } from './LoadingScreen';
 
-// FBX Model Bileşeni
+// Optimized Character Model Component
 type CharacterModelProps = {
   position?: [number, number, number];
   scale?: number;
@@ -19,103 +20,83 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
 }) => {
   const group = useRef<THREE.Group>(null!);
   const fbx = useFBX('/Lupi1.fbx');
-  const { scene } = useThree();
+  const { scene, invalidate } = useThree();
   
-  // Modeli hafifçe döndürme animasyonu
+  // Optimized animation with performance consideration
   useFrame((state) => {
     if (group.current) {
-      // Daha yavaş ve daha hafif dönüş
+      // Smoother, more efficient rotation
       group.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.15;
+      // Request invalidation for on-demand rendering
+      invalidate();
     }
   });
 
   useEffect(() => {
-    // FBX modellerinde malzemeleri ve ışığı iyileştirme
-    if (fbx) {
-      // Modelin orijinal konumunu merkeze getir
-      fbx.position.set(0, 0, 0);
+    if (!fbx) return;
+    
+    // Center the model
+    fbx.position.set(0, 0, 0);
+    
+    // Material optimization function
+    const optimizeMaterial = (originalMaterial: THREE.Material): THREE.Material => {
+      if (!originalMaterial) return originalMaterial;
       
-      // HMR için cache temizleme
-      if (process.env.NODE_ENV === 'development') {
-        fbx.traverse((child) => {
-          if (child instanceof THREE.Mesh && child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach(mat => {
-                mat.needsUpdate = true;
-                if (mat.map) mat.map.needsUpdate = true;
-              });
-            } else {
-              child.material.needsUpdate = true;
-              if (child.material.map) child.material.map.needsUpdate = true;
-            }
-          }
-        });
-      }
-      
-      // Modelin yönünü düzelt (gerekirse)
-      // fbx.rotation.set(0, Math.PI, 0); // Y ekseninde 180 derece döndürmek için
-      
-      // Tip koruma (type guard) fonksiyonu
-      const hasMap = (material: THREE.Material): material is THREE.Material & { map: THREE.Texture | null } => {
-        return 'map' in material && material.map !== undefined;
-      };
-      
-      // Özel materyal oluşturan veya mevcut materyali düzenleyen fonksiyon
-      const applyCustomMaterialWithReflection = (originalMaterial: THREE.Material): THREE.Material => {
-        if (!originalMaterial) return originalMaterial;
-        
-        // Yeni MeshStandardMaterial oluştur
-        const newMaterial = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          roughness: 1.0,
-          metalness: 0.0,
-          emissive: new THREE.Color(0x000000),
-          emissiveIntensity: 0.0,
-          envMap: null,
-        });
-        
-        // Orijinal materyalden texture bilgilerini kopyala
-        if (hasMap(originalMaterial) && originalMaterial.map !== null) {
-          newMaterial.map = originalMaterial.map;
-          newMaterial.map.anisotropy = 16;
-        }
-        
-        // Orijinal materyalden renk bilgisini kopyala
-        if ('color' in originalMaterial) {
-          const materialWithColor = originalMaterial as THREE.Material & { color: THREE.Color };
-          newMaterial.color = materialWithColor.color;
-        }
-        
-        newMaterial.needsUpdate = true;
-        
-        return newMaterial;
-      };
-      
-      // Modelin tüm materyallerini işleyelim
-      fbx.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          // Materyal işlemleri
-          if (child.material) {
-            // Tek materyal veya materyal dizisi için işlem yap
-            if (Array.isArray(child.material)) {
-              child.material = child.material.map(applyCustomMaterialWithReflection);
-            } else {
-              child.material = applyCustomMaterialWithReflection(child.material);
-            }
-          }
-          
-          // Gölgeleri etkinleştirme
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
+      const newMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.8,
+        metalness: 0.1,
+        envMapIntensity: 0.3,
       });
       
-      // Model yüklendikten sonra callback çağır
-      if (onLoad) {
-        onLoad();
+      // Copy texture if exists with proper type checking
+      if ('map' in originalMaterial && originalMaterial.map) {
+        const texture = originalMaterial.map as THREE.Texture;
+        newMaterial.map = texture;
+        texture.anisotropy = Math.min(16, texture.anisotropy || 1);
       }
+      
+      // Copy color if exists
+      if ('color' in originalMaterial) {
+        const materialWithColor = originalMaterial as THREE.Material & { color: THREE.Color };
+        newMaterial.color = materialWithColor.color;
+      }
+      
+      newMaterial.needsUpdate = true;
+      return newMaterial;
+    };
+    
+    // Traverse and optimize
+    fbx.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        // Optimize materials
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material = child.material.map(optimizeMaterial);
+          } else {
+            child.material = optimizeMaterial(child.material);
+          }
+        }
+        
+        // Enable shadows efficiently
+        child.castShadow = true;
+        child.receiveShadow = true;
+        
+        // Optimize geometry if needed
+        if (child.geometry) {
+          child.geometry.computeBoundingSphere();
+        }
+      }
+    });
+    
+    // Model loaded callback
+    if (onLoad) {
+      onLoad();
     }
-  }, [fbx, scene, onLoad]);
+    
+    // Force invalidation after model setup
+    invalidate();
+  }, [fbx, scene, onLoad, invalidate]);
 
   return (
     <group ref={group} position={position} scale={scale}>
@@ -124,81 +105,246 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
   );
 };
 
-// Ana 3D sahne
-type SceneProps = {
-  onModelLoad?: () => void;
+// Low Quality Fallback Component
+const LowQualityCharacter: React.FC = () => {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const { invalidate } = useThree();
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.15;
+      invalidate();
+    }
+  });
+  
+  return (
+    <mesh ref={meshRef} position={[0, -1, 0]} castShadow receiveShadow>
+      <boxGeometry args={[1, 2, 0.5]} />
+      <meshStandardMaterial
+        color="#8b5cf6"
+        roughness={0.8}
+        metalness={0.1}
+      />
+    </mesh>
+  );
 };
 
-const Scene: React.FC<SceneProps> = ({ onModelLoad }) => {
+// Optimized Scene Component
+type SceneProps = {
+  onModelLoad?: () => void;
+  isLowPerformance?: boolean;
+};
+
+const Scene: React.FC<SceneProps> = ({ onModelLoad, isLowPerformance = false }) => {
+  const { invalidate } = useThree();
+  
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
-      <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.6} castShadow />
-      <pointLight position={[-5, -5, -5]} intensity={0.2} />
-      <pointLight position={[5, -5, 5]} intensity={0.2} color="#ffffff" />
+      {/* Optimized lighting setup */}
+      <ambientLight intensity={isLowPerformance ? 0.4 : 0.3} />
+      <directionalLight
+        position={[5, 10, 5]}
+        intensity={isLowPerformance ? 0.6 : 0.8}
+        castShadow={!isLowPerformance}
+        shadow-mapSize-width={isLowPerformance ? 512 : 1024}
+        shadow-mapSize-height={isLowPerformance ? 512 : 1024}
+      />
+      {!isLowPerformance && (
+        <>
+          <spotLight position={[5, 5, 5]} angle={0.25} penumbra={1} intensity={0.6} castShadow />
+          <pointLight position={[-5, -5, -5]} intensity={0.2} />
+          <pointLight position={[5, -5, 5]} intensity={0.2} color="#ffffff" />
+        </>
+      )}
       <hemisphereLight args={['#ffffff', '#8080ff', 0.3]} />
       
-      <Suspense fallback={null}>
+      {/* Nested Suspense Strategy */}
+      <Suspense fallback={<LowQualityCharacter />}>
         <CharacterModel position={[0, -1, 0]} scale={0.015} onLoad={onModelLoad} />
-        
-        <ContactShadows
-          position={[0, -1.5, 0]}
-          opacity={0.3}
-          scale={12}
-          blur={2.5}
-          far={5}
-          color="#350c50"
-        />
       </Suspense>
+      
+      {/* Contact Shadows */}
+      <ContactShadows
+        position={[0, -1.5, 0]}
+        opacity={isLowPerformance ? 0.2 : 0.3}
+        scale={12}
+        blur={isLowPerformance ? 1.5 : 2.5}
+        far={5}
+        color="#350c50"
+      />
+      
+      {/* Orbit Controls */}
       <OrbitControls
         enableZoom={true}
         enablePan={true}
         maxDistance={10}
         minDistance={2}
+        enableDamping={true}
+        dampingFactor={0.05}
+        onEnd={() => {
+          // Trigger invalidation when user interaction ends
+          invalidate();
+        }}
       />
     </>
   );
 };
 
-// Ana CharacterViewer bileşeni
+// Performance Monitor Component
+const AdaptivePerformance: React.FC<{
+  onPerformanceChange?: (isLowPerformance: boolean) => void
+}> = ({ onPerformanceChange }) => {
+  const setDpr = useThree(state => state.setDpr);
+
+  return (
+    <PerformanceMonitor
+      onIncline={() => {
+        setDpr(2);
+        onPerformanceChange?.(false);
+      }}
+      onDecline={() => {
+        setDpr(1);
+        onPerformanceChange?.(true);
+      }}
+      onFallback={() => {
+        setDpr(0.5);
+        onPerformanceChange?.(true);
+      }}
+      flipflops={3}
+    />
+  );
+};
+
+// Main CharacterViewer Component
 export const CharacterViewer: React.FC = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isLowPerformance, setIsLowPerformance] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const handleModelLoad = () => {
     setIsModelLoaded(true);
+    setLoadingProgress(100);
   };
+
+  const handlePerformanceChange = (lowPerf: boolean) => {
+    setIsLowPerformance(lowPerf);
+  };
+
+  useEffect(() => {
+    // Simulate loading progress for better UX
+    const interval = setInterval(() => {
+      setLoadingProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        if (newProgress >= 95 && !isModelLoaded) {
+          clearInterval(interval);
+          return 95;
+        }
+        return Math.min(newProgress, 100);
+      });
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [isModelLoaded]);
   
   return (
     <div className="w-full h-[600px] lg:h-[700px] relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_50px_rgba(142,68,173,0.3)]">
       <Canvas
         key={process.env.NODE_ENV === 'development' ? Date.now() : 'production'}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+        gl={{
+          antialias: !isLowPerformance,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
         camera={{ position: [0, 0, 5], fov: 45 }}
-        shadows="soft"
+        shadows={!isLowPerformance ? "soft" : false}
         performance={{ min: 0.5 }}
         frameloop="demand"
       >
-        <Scene onModelLoad={handleModelLoad} />
+        <AdaptivePerformance onPerformanceChange={handlePerformanceChange} />
+        <Scene onModelLoad={handleModelLoad} isLowPerformance={isLowPerformance} />
       </Canvas>
       
-      {/* Yükleme göstergesi */}
+      {/* Enhanced Loading Screen */}
       {!isModelLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#090420]/80">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-purple-300 font-medium">Karakter yükleniyor...</p>
+        <Suspense fallback={<SimpleLoadingScreen />}>
+          <div className="absolute inset-0 flex items-center justify-center bg-[#090420]/90 backdrop-blur-sm">
+            <div className="flex flex-col items-center space-y-6">
+              {/* Progress Circle */}
+              <div className="relative w-24 h-24">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="rgba(139, 92, 246, 0.2)"
+                    strokeWidth="6"
+                    fill="none"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="rgb(139, 92, 246)"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 45}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - loadingProgress / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-300 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-purple-300 font-bold text-lg">
+                    {Math.round(loadingProgress)}%
+                  </span>
+                </div>
+              </div>
+              
+              {/* Loading Text */}
+              <div className="text-center space-y-2">
+                <p className="text-purple-300 font-medium text-xl">
+                  3D Karakter Yükleniyor
+                </p>
+                <p className="text-purple-400/70 text-sm">
+                  {loadingProgress < 30 && "Model indiriliyor..."}
+                  {loadingProgress >= 30 && loadingProgress < 60 && "Materyaller hazırlanıyor..."}
+                  {loadingProgress >= 60 && loadingProgress < 90 && "Optimizasyon yapılıyor..."}
+                  {loadingProgress >= 90 && "Son kontroller..."}
+                </p>
+              </div>
+              
+              {/* Loading Animation */}
+              <div className="flex space-x-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"
+                    style={{
+                      animationDelay: `${i * 0.15}s`,
+                      animationDuration: '0.6s'
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
           </div>
+        </Suspense>
+      )}
+      
+      {/* Performance Indicator */}
+      {isModelLoaded && isLowPerformance && (
+        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/40 backdrop-blur-sm">
+          <span className="text-yellow-300 text-xs font-medium">Düşük Performans Modu</span>
         </div>
       )}
       
-      {/* Canvas üzerine bindirilen bilgiler */}
+      {/* Interactive Instructions */}
       <div className="absolute bottom-6 left-6 right-6 rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 p-4 text-white text-sm">
         <div className="flex items-center justify-center gap-3">
-          <div className="bg-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 w-3 rounded-full animate-pulse"></div>
           <div className="font-mono opacity-70 text-xs">
-            Modeli döndürmek için tıklayıp sürükleyin
+            Modeli döndürmek için tıklayıp sürükleyin • Yakınlaştırmak için kaydırın
           </div>
         </div>
       </div>
