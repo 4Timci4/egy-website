@@ -35,6 +35,32 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
   useEffect(() => {
     if (!fbx) return;
     
+    // Global console.warn override for FBX warnings
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    // Suppress all FBX related warnings and errors
+    console.warn = (...args) => {
+      const message = args.join(' ');
+      if (message.includes('FBXLoader') ||
+          message.includes('map is not supported in three.js') ||
+          message.includes('ReflectionFactor') ||
+          message.includes('ShininessExponent') ||
+          message.includes('THREE.FBXLoader')) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+    
+    console.error = (...args) => {
+      const message = args.join(' ');
+      if (message.includes('FBXLoader') ||
+          message.includes('map is not supported in three.js')) {
+        return;
+      }
+      originalError.apply(console, args);
+    };
+    
     // Center the model
     fbx.position.set(0, 0, 0);
     
@@ -96,6 +122,12 @@ const CharacterModel: React.FC<CharacterModelProps> = ({
     
     // Force invalidation after model setup
     invalidate();
+    
+    // Cleanup: restore original console functions
+    return () => {
+      console.warn = originalWarn;
+      console.error = originalError;
+    };
   }, [fbx, scene, onLoad, invalidate]);
 
   return (
