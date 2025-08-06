@@ -5,11 +5,10 @@ import NeonNavBar from '@/components/NeonNavBar';
 import { Footer } from '@/components/Footer';
 import { getCharacterById } from '@/data/characters';
 import Link from 'next/link';
-
 interface CharacterDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function CharacterDetailPage({ params }: CharacterDetailPageProps) {
