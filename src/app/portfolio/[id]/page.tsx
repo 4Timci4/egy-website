@@ -24,7 +24,7 @@ export default async function CharacterDetailPage({ params }: CharacterDetailPag
       <BackgroundEffects />
       <NeonNavBar />
       
-      <div className="pt-32 pb-12">
+      <div className="pt-48 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Back Button */}
@@ -48,7 +48,7 @@ export default async function CharacterDetailPage({ params }: CharacterDetailPag
               </span>
             </h1>
             <p className="text-2xl text-purple-300 font-medium">{character.title}</p>
-            <p className="text-lg text-white/70 max-w-3xl mx-auto">{character.description}</p>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto">{character.description}</p>
           </div>
 
           {/* Main Content Grid */}

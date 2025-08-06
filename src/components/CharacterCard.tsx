@@ -81,10 +81,10 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({ character }) => {
             <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors duration-300">
               {character.name}
             </h3>
-            <p className="text-purple-400 font-medium">{character.title}</p>
+            <p className="text-lg text-purple-400 font-medium">{character.title}</p>
           </div>
           
-          <p className="text-white/70 text-sm line-clamp-3 group-hover:text-white/90 transition-colors duration-300">
+          <p className="text-white/70 text-base line-clamp-3 group-hover:text-white/90 transition-colors duration-300">
             {character.description}
           </p>
           
