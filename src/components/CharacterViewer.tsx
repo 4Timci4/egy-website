@@ -11,15 +11,17 @@ type CharacterModelProps = {
   position?: [number, number, number];
   scale?: number;
   onLoad?: () => void;
+  modelPath?: string;
 };
 
 const CharacterModel: React.FC<CharacterModelProps> = ({
   position = [0, 0, 0],
   scale = 0.01,
-  onLoad
+  onLoad,
+  modelPath = '/Lupi1.fbx'
 }) => {
   const group = useRef<THREE.Group>(null!);
-  const fbx = useFBX('/Lupi1.fbx');
+  const fbx = useFBX(modelPath);
   const { scene, invalidate } = useThree();
   
   // Optimized animation with performance consideration
@@ -165,9 +167,10 @@ const LowQualityCharacter: React.FC = () => {
 type SceneProps = {
   onModelLoad?: () => void;
   isLowPerformance?: boolean;
+  modelPath?: string;
 };
 
-const Scene: React.FC<SceneProps> = ({ onModelLoad, isLowPerformance = false }) => {
+const Scene: React.FC<SceneProps> = ({ onModelLoad, isLowPerformance = false, modelPath }) => {
   const { invalidate } = useThree();
   
   return (
@@ -192,7 +195,7 @@ const Scene: React.FC<SceneProps> = ({ onModelLoad, isLowPerformance = false }) 
       
       {/* Nested Suspense Strategy */}
       <Suspense fallback={<LowQualityCharacter />}>
-        <CharacterModel position={[0, -1, 0]} scale={0.015} onLoad={onModelLoad} />
+        <CharacterModel position={[0, -1, 0]} scale={0.015} onLoad={onModelLoad} modelPath={modelPath} />
       </Suspense>
       
       {/* Contact Shadows */}
@@ -248,7 +251,11 @@ const AdaptivePerformance: React.FC<{
 };
 
 // Main CharacterViewer Component
-export const CharacterViewer: React.FC = () => {
+type CharacterViewerProps = {
+  modelPath?: string;
+};
+
+export const CharacterViewer: React.FC<CharacterViewerProps> = ({ modelPath }) => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isLowPerformance, setIsLowPerformance] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -294,7 +301,7 @@ export const CharacterViewer: React.FC = () => {
         frameloop="demand"
       >
         <AdaptivePerformance onPerformanceChange={handlePerformanceChange} />
-        <Scene onModelLoad={handleModelLoad} isLowPerformance={isLowPerformance} />
+        <Scene onModelLoad={handleModelLoad} isLowPerformance={isLowPerformance} modelPath={modelPath} />
       </Canvas>
       
       {/* Enhanced Loading Screen */}
