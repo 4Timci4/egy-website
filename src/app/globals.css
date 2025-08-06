@@ -12,7 +12,8 @@
   --border: #e2e8f0;
 }
 
-@theme inline {
+/* Theme variables for Tailwind integration */
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -44,10 +45,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scrolling for anchor links */
-html {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling for anchor links - handled by Tailwind's scroll-smooth class */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
